@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::fs;
 
 fn get_data() -> String {
@@ -7,6 +9,16 @@ fn get_data() -> String {
     };
 
     input
+}
+
+fn is_match_part_two(current_group: &HashMap<char, u32>) -> bool {
+    for (_, value) in current_group {
+        if *value > 1 {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn is_match(current_group: u32) -> bool {
@@ -55,6 +67,32 @@ fn part_one() {
     println!("Marker appears after position {}", index);
 }
 
+fn part_two() {
+    let input = get_data();
+    let mut current_group_hash: HashMap<char, u32> = HashMap::new();
+    let mut current_group: VecDeque<char> = VecDeque::new();
+
+    for (index, ch) in input.char_indices() {
+        current_group.push_back(ch);
+        let new_hash_entry = current_group_hash.entry(ch).or_insert(0);
+        *new_hash_entry += 1;
+
+        if index > 13 {
+            let discarded_char = current_group.pop_front().unwrap();
+            current_group_hash
+                .entry(discarded_char)
+                .and_modify(|item| *item -= 1)
+                .or_insert(0);
+
+            if !is_match_part_two(&current_group_hash) {
+                println!("Marker appears after position {}", index + 1);
+                break;
+            }
+        }
+    }
+}
+
 fn main() {
-    part_one();
+    // part_one();
+    part_two();
 }
